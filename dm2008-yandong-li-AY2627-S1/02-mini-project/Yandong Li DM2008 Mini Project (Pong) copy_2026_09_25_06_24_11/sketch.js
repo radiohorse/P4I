@@ -5,6 +5,11 @@ let leftScore = 0;
 let rightScore = 0;
 let bgm, duration;
 
+//fft
+let fft; let smoothing = 0.8; let bins = 512;
+let waveform = []; let r = 100;
+let spectrum = [];
+
 // Game states: "playing" or "gameover" — add more if you need them
 let gameState = "menu";
 
@@ -16,14 +21,28 @@ async function setup() {
   noStroke();
   leftPaddle = new Paddle(30, height / 2 - 30, 10, 60);
   rightPaddle = new Paddle(width - 40, height / 2 - 30, 10, 60);
-  ball = new Ball(width / 2, height / 2, 6);
+  ball = new Ball(width / 2, height / 2, 12); //r = 5-12
 
   duration = bgm.duration();
-  //bgm.play();
+
+  //fft
+  fft = new p5.FFT(bins);
+  fft.setInput(bgm);
 }
 
 function draw() {
-  background(250, 80);
+  //fft
+  waveform = fft.waveform();
+  spectrum = fft.analyze();
+  let bass = getBandEnergy(20, 440);
+  let high = getBandEnergy(440,1600);
+
+  background(250, map(constrain(high, 0, 1), 0, 1, 100,0.0005 ));
+  
+  //background(250, map(high, 0,1, 80, 1000);
+
+  
+  ball.r = map(constrain(bass, 0, 10), 0, 1, 6, 1000);
 
   if (gameState == "menu" && gameState != 'playing' && gameState != 'gameover') {
     drawStart();
@@ -48,7 +67,9 @@ function draw() {
     drawCourt();
     leftPaddle.show();
     rightPaddle.show();
+
     ball.show();
+    
 
     // Display scores — look up textAlign() and textSize() in the p5.js reference
     displayScores();
@@ -162,7 +183,9 @@ class Ball {
   }
 
   show() {
-    fill('#94d1eb');
+    let bass = getBandEnergy(20, 440);
+    //fill('#94d1eb');
+    fill(map(constrain(bass, 0, 10), 0, 10, 150, 20000), map(constrain(bass, 0, 10), 0, 10, 209, 20000), map(constrain(bass, 0, 10), 0, 10, 305, 20000), map(constrain(bass, 0, 10), 0, 10, 180, 20000));
     circle(this.pos.x, this.pos.y, this.r * 2);
   }
 
@@ -305,4 +328,20 @@ function stateJudge() {
       }
     }
   }
+}
+
+function getBandEnergy(lowHz, highHz) {
+  if (spectrum.length === 0) return 0;
+
+  const step = getAudioContext().sampleRate / 2 / spectrum.length;
+
+  const start = constrain(floor(lowHz / step), 0, spectrum.length - 1);
+  const end = constrain(floor(highHz / step), start, spectrum.length - 1);
+
+  let sum = 0;
+  for (let i = start; i <= end; i++) {
+    sum += spectrum[i];
+  }
+
+  return sum / (end - start + 1);
 }
