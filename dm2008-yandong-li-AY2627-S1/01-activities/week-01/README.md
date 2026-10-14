@@ -1,4 +1,4 @@
-# Week ## — Topic Name
+# Week 1 — Drawing with Code
 
 <!-- Replace ## with the week number and Topic Name with the week's focus -->
 
@@ -10,10 +10,10 @@
 
 ### Activities
 
-|Activity|What I Made|
-|-|-|
-|`1a`|<!-- one line description -->|
-|`1b`|<!-- one line description -->|
+| Activity | What I Made                   |
+| -------- | ----------------------------- |
+| `1a`     | <!-- one line description --> |
+| `1b`     | <!-- one line description --> |
 
 <!-- Add or remove rows to match the activities for this week. -->
 

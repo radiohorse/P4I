@@ -1,25 +1,23 @@
-# Mini Project — Title
-
-<!-- Replace "Title" with the name of your project, e.g. "Mini Project — Pong Remix" -->
+# Mini Project — Pong by Dong
 
 ---
 
 ### The Project
 
-<!-- What did you build and what makes it yours? A few sentences is enough.
-     What did you change, add, or push beyond the scaffold? -->
+- Added a start menu and a game over page
+- Added a bgm - Luminous Dance which is made by myself
+- Adjusted the transparency of the background so when paddles and the ball is moving, there will be shadow
+- Used fft function to make the size and color of the ball change according to the volume of bgm
+- Changed the overall theme color to light blue and white
 
 ---
 
 ### Output
+![[Pong by Dong.gif]]
 
-![screenshot](readme-assets/screenshot-01.png)
 
-<!-- Drop a screenshot or GIF of your finished project.
-     Save it to a readme-assets/ folder inside this project folder.
-     Got more than one good screenshot? Add them. -->
 
-[Watch Online](https://your-link-here)
+[Watch Online](https://www.youtube.com/watch?v=Mx5z4Iru7pg)
 
 <!-- Replace the link above with a URL to a screen recording or video of your project.
      ⚠️ Make sure the file or page is set to public before submitting. -->
@@ -28,35 +26,16 @@
 
 ### ✍️ Reflection
 
-<!-- 200–300 words on your process. Write freely — this isn't an essay.
-     Some prompts to get you started:
-     — What did you set out to make, and how did the result compare?
-     — What inputs does your sketch respond to, and how did you approach that?
+<!-- 
+     — At first, hope this project can combine audio reactive elements.
+	 So I learnt about fft functions, try to understand and implement this technique. After I went through some example code using fft, I managed to use fft to control the size and color of the ball
      — What was your biggest challenge, and how did you work through it?
-     — What would you push further if you had more time? -->
+     The biggest challenge is learning about fft, since it's related to some hard mathematics
+     — What would you push further if you had more time? --> 
+     I would add more audio-reactive elements, make the background of paddle dance to the bgm.
 
 ---
 
-<!-- ─────────────────────────────────────────────────────
-     GOING FURTHER — want to document more? Try any of these:
-
-     ### ✨ What I Changed
-     A short list of the additions and modifications you made to the scaffold.
-     - Changed the paddle to use mouse tracking instead of keyboard
-     - Redesigned the visual language with a retro CRT aesthetic
-
-     ### 🔍 Code Structure
-     Briefly explain how your files are organised.
-     - `sketch.js` — main game loop
-     - `Ball.js` — ball class with collision logic
-     - `assets/` — sprites and sounds
-
-     ### 🧩 Something I'm Proud Of
-     A snippet of code, a design decision, a moment where it clicked.
-     ```js
-     // your code here
-     ```
-
      ### 🔗 References
-     Anything that helped or inspired you — tutorials, artworks, tools.
+     radiom.bandcamp.com
      ───────────────────────────────────────────────────── -->
