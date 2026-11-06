@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Helvetica rendering check</title>
+<style>
+@font-face {font-family:LightOriginal;src:url('/work/Helvetica-Light-before.woff') format('woff');}
+@font-face {font-family:LightAntialiased;src:url('/work/Helvetica-Light-antialiased.woff') format('woff');}
+@font-face {font-family:LightUnhinted;src:url("/work/Helvetica-Light-unhinted-only.woff") format("woff");}
+@font-face {font-family:Helvetica;src:url('/assets/fonts/Helvetica.ttf') format('truetype');}
+body{margin:32px;background:#efefe8;color:#3a4d43;font-family:Helvetica;font-size:16px;font-synthesis:none;}
+article{padding:24px;background:rgb(249,243,243);margin-bottom:24px;}
+h2{font:16px Helvetica;margin:0 0 20px;}
+p{font-size:16px;font-weight:400;line-height:1.5;}
+.original{font-family:LightOriginal}.candidate{font-family:LightAntialiased}.unhinted{font-family:LightUnhinted}
+</style>
+<article><h2>Original Helvetica Light: small-size grayscale flag is off</h2><p class="original">C · Ionian</p><p class="original">Intensity · 45%</p><p class="original">The quick brown fox 0123456789</p></article>
+<article><h2>Same Light outlines: small-size grayscale flag is on</h2><p class="candidate">C · Ionian</p><p class="candidate">Intensity · 45%</p><p class="candidate">The quick brown fox 0123456789</p></article>
+<article><h2>Same Light outlines: legacy hinting removed</h2><p class="unhinted">C · Ionian</p><p class="unhinted">Intensity · 45%</p><p class="unhinted">The quick brown fox 0123456789</p></article><pre id="check">Loading both faces...</pre>
+<script>Promise.all([document.fonts.load('16px LightOriginal'),document.fonts.load('16px LightAntialiased')]).then(()=>{
+document.getElementById('check').textContent=JSON.stringify({original:getComputedStyle(document.querySelector('.original')).font,candidate:getComputedStyle(document.querySelector('.candidate')).font,devicePixelRatio:window.devicePixelRatio,fonts:Array.from(document.fonts).map(f=>({family:f.family,status:f.status}))},null,2);
+});</script></html>

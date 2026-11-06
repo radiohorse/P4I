@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Modular instrument check</title>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/helper.js"></script>
+  <script src="/js/p5.min.js"></script>
+  <script src="/js/p5.sound.min.js"></script>
+  <script src="/js/ml5.min.js"></script>
+</head>
+<body>
+  <div style="position:fixed;right:20px;bottom:20px;z-index:5;display:flex;gap:12px;font:16px 'Helvetica Light';">
+    <button id="fixture-fist">Test: close left hand</button>
+    <button id="fixture-right-fist">Test: close right hand</button>
+    <button id="fixture-half-left">Test: half-open left hand</button>
+    <button id="fixture-half-right">Test: half-open right hand</button>
+    <button id="fixture-rapid">Test: rapid hand movement</button>
+    <button id="fixture-hide">Test: hide hands</button>
+    <button id="fixture-open">Test: show open hands</button>
+    <button id="fixture-near">Test: move hands near</button>
+    <button id="fixture-far">Test: move hands far</button>
+  </div>
+  <output id="module-check" hidden></output>
+  <script>
+    // Test-only camera/model substitutes: no camera permission or model download is needed.
+    // The actual entry and all seven production modules are loaded unchanged below.
+    let mode='open',leftRatio=1.8,rightRatio=1.8,captureCalls=0,detectionLoops=0;
+    const effects=[],envelopes=[],volumeTrace=[],attacks={Pad:0,Bell:0};
+    document.getElementById('fixture-fist').onclick=()=>{mode='fist';leftRatio=1;};
+    document.getElementById('fixture-right-fist').onclick=()=>{mode='right-fist';rightRatio=1;};
+    document.getElementById('fixture-half-left').onclick=()=>{mode='half-left';leftRatio=1.4;};
+    document.getElementById('fixture-half-right').onclick=()=>{mode='half-right';rightRatio=1.4;};
+    document.getElementById('fixture-rapid').onclick=()=>{mode='rapid';};
+    document.getElementById('fixture-hide').onclick=()=>{mode='hidden';};
+    document.getElementById('fixture-open').onclick=()=>{mode='open';leftRatio=rightRatio=1.8;};
+    document.getElementById('fixture-near').onclick=()=>{mode='near';};
+    document.getElementById('fixture-far').onclick=()=>{mode='far';};
+    p5.prototype.createCapture=function(type,onReady){
+      captureCalls++;
+      const image=this.createImage(640,480);
+      image.loadPixels();
+      for(let y=0;y<480;y++)for(let x=0;x<640;x++){
+        const i=(y*640+x)*4;
+        image.pixels[i]=185+x/20;image.pixels[i+1]=196+y/24;
+        image.pixels[i+2]=191;image.pixels[i+3]=255;
+      }
+      image.updatePixels();image.hide=()=>{};image.remove=()=>{};
+      setTimeout(()=>onReady(),0);
+      return image;
+    };
+    function hand(label,x,y,ratio){
+      const size=mode==='near'?145:mode==='far'?40:90;
+      return {handedness:label,confidence:.99,wrist:{x,y},
+        index_finger_mcp:{x:x-20,y:y-size},middle_finger_mcp:{x,y:y-size},
+        ring_finger_mcp:{x:x+10,y:y-size},pinky_finger_mcp:{x:x+20,y:y-size},
+        index_finger_tip:{x,y:y-size*ratio},middle_finger_tip:{x,y:y-size*ratio},
+        ring_finger_tip:{x,y:y-size*ratio},pinky_finger_tip:{x,y:y-size*ratio}};
+    }
+    ml5.handPose=async()=>({ready:Promise.resolve(),detectStart(video,callback){
+      detectionLoops++;
+      let tick=0;
+      this.timer=setInterval(()=>{
+        const rapidlyOpen=++tick%4<2;
+        callback(mode==='hidden'?[]:[
+          hand('Left',180,270,mode==='rapid'?(rapidlyOpen?1.8:1):leftRatio),
+          hand('Right',450,300,mode==='rapid'?(rapidlyOpen?1:1.8):rightRatio),
+        ]);
+      },40);
+    },detectStop(){clearInterval(this.timer);}});
+    const Reverb=p5.Reverb,Envelope=p5.Envelope;
+    p5.Reverb=class extends Reverb{
+      constructor(...args){super(...args);effects.push({effect:this,maximumPeak:0});}
+    };
+    p5.Envelope=class extends Envelope{
+      constructor(...args){super(...args);this.kind=args[2]>0?'Pad':'Bell';envelopes.push(this);}
+      triggerAttack(){attacks[this.kind]++;return super.triggerAttack();}
+    };
+    setInterval(()=>{
+      for(const item of effects){
+        if(!item.analyser){item.analyser=item.effect.ctx.createAnalyser();item.analyser.fftSize=2048;item.effect.output.connect(item.analyser);}
+        const samples=new Float32Array(item.analyser.fftSize);item.analyser.getFloatTimeDomainData(samples);
+        item.currentPeak=samples.reduce((p,v)=>Math.max(p,Math.abs(v)),0);
+        item.maximumPeak=Math.max(item.maximumPeak,item.currentPeak);
+      }
+      volumeTrace.push({mode,time:performance.now(),levels:effects.map(e=>e.effect.output.gain.value)});
+      if(volumeTrace.length>45)volumeTrace.shift();
+      document.getElementById('module-check').textContent=JSON.stringify({mode,captureCalls,detectionLoops,
+        canvases:document.querySelectorAll('canvas').length,
+        readouts:Array.from(document.querySelectorAll('.readout')).map(e=>({text:e.textContent,absent:e.classList.contains('absent')})),
+        audioButton:document.querySelector('.icon-toggle')?.getAttribute('aria-label'),logicalSize:[window.width,window.height],viewport:[window.innerWidth,window.innerHeight],resizeHook:typeof window.resizeCanvas,attacks,
+        audio:effects.map(e=>({reverbSeconds:e.effect.decayTime,wet:e.effect.wet(),volume:e.effect.output.gain.value,maximumPeak:e.maximumPeak,currentPeak:e.currentPeak})),
+        volumeTrace,
+        envelopes:envelopes.map(e=>({kind:e.kind,value:e.node.value})),
+        fonts:Array.from(document.fonts).map(f=>({family:f.family,status:f.status}))});
+    },100);
+  </script>
+  <script type="module" src="/src/depthSketch.js"></script>
+</body>
+</html>

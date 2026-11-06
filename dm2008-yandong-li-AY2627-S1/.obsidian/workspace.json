@@ -11,10 +11,14 @@
             "id": "a7fe9c65de8affb4",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "04-final-project-quiet-reply/LEARNING_NOTES.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "新标签页"
+              "title": "LEARNING_NOTES"
             }
           }
         ]
@@ -186,6 +190,24 @@
   },
   "active": "a7fe9c65de8affb4",
   "lastOpenFiles": [
+    "求职.md",
+    "04-final-project-quiet-reply/LEARNING_NOTES.md",
+    "04-final-project-quiet-reply/work/continuous-bell-preview.png",
+    "04-final-project-quiet-reply/work/continuous-bell-check.mjs",
+    "04-final-project-quiet-reply/work/bell-speed-preview.png",
+    "04-final-project-quiet-reply/work/bell-speed-browser-check.html",
+    "04-final-project-quiet-reply/work/bell-timing-check.mjs",
+    "04-final-project-quiet-reply/work/harmonic-before-bell-speed.js",
+    "04-final-project-quiet-reply/work/generative-before-bell-speed.js",
+    "04-final-project-quiet-reply/LEARNING_NOTES.md.tmp.32132.f506f2d323b9",
+    "04-final-project-quiet-reply/LEARNING_NOTES.md.tmp.32132.7e235d148463",
+    "04-final-project-quiet-reply/work/sed1RWH9I",
+    "04-final-project-quiet-reply/work/harmony-check.mjs.tmp.32132.7132a33c939a",
+    "04-final-project-quiet-reply/work/harmony-check.mjs.tmp.32132.aee1b2358521",
+    "04-final-project-quiet-reply/work/modular-control-preview.png",
+    "04-final-project-quiet-reply/work/camera-check.png",
+    "04-final-project-quiet-reply/work/pad-instrument-preview.png",
+    "04-final-project-quiet-reply/README.md",
     "02-mini-project/README.md",
     "Pong by Dong.gif",
     "01-activities/week-01/README.md"

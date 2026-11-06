@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Bell speed check</title>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/helper.js"></script>
+  <script src="/js/p5.min.js"></script>
+  <script src="/js/p5.sound.min.js"></script>
+  <script src="/js/ml5.min.js"></script>
+</head>
+<body>
+  <div style="position:fixed;right:20px;bottom:20px;z-index:5;display:flex;gap:12px;font:16px 'Helvetica Light';">
+    <button id="fixture-fist">Test: close left hand</button>
+    <button id="fixture-hide">Test: hide hands</button>
+    <button id="fixture-open">Test: show open hands</button>
+    <button id="fixture-half">Test: right 50%</button>
+    <button id="fixture-near">Test: right 10%</button>
+    <button id="fixture-right-fist">Test: close right hand</button>
+  </div>
+  <output id="module-check" hidden></output>
+  <script>
+    // Test-only camera/model substitutes: no camera permission or model download is needed.
+    // The actual entry and all seven production modules are loaded unchanged below.
+    let mode='open',captureCalls=0,detectionLoops=0;
+    const effects=[],envelopes=[],attacks={Pad:0,Bell:0},bellEvents=[];
+    document.getElementById('fixture-fist').onclick=()=>{mode='fist';};
+    document.getElementById('fixture-hide').onclick=()=>{mode='hidden';};
+    document.getElementById('fixture-open').onclick=()=>{mode='open';};
+    document.getElementById('fixture-half').onclick=()=>{mode='half';};
+    document.getElementById('fixture-near').onclick=()=>{mode='near';};
+    document.getElementById('fixture-right-fist').onclick=()=>{mode='right-fist';};
+    p5.prototype.createCapture=function(type,onReady){
+      captureCalls++;
+      const image=this.createImage(640,480);
+      image.loadPixels();
+      for(let y=0;y<480;y++)for(let x=0;x<640;x++){
+        const i=(y*640+x)*4;
+        image.pixels[i]=185+x/20;image.pixels[i+1]=196+y/24;
+        image.pixels[i+2]=191;image.pixels[i+3]=255;
+      }
+      image.updatePixels();image.hide=()=>{};image.remove=()=>{};
+      setTimeout(()=>onReady(),0);
+      return image;
+    };
+    function hand(label,x,y,ratio){
+      return {handedness:label,confidence:.99,wrist:{x,y},
+        index_finger_mcp:{x:x-20,y:y-50},middle_finger_mcp:{x,y:y-50},
+        ring_finger_mcp:{x:x+10,y:y-50},pinky_finger_mcp:{x:x+20,y:y-50},
+        index_finger_tip:{x,y:y-50*ratio},middle_finger_tip:{x,y:y-50*ratio},
+        ring_finger_tip:{x,y:y-50*ratio},pinky_finger_tip:{x,y:y-50*ratio}};
+    }
+    ml5.handPose=async()=>({ready:Promise.resolve(),detectStart(video,callback){
+      detectionLoops++;
+      this.timer=setInterval(()=>callback(mode==='hidden'?[]:[
+        hand('Left',180,270,mode==='fist'?1:1.8),hand('Right',450,300,mode==='half'?1.4:mode==='near'?1.12:mode==='right-fist'?1:1.8),
+      ]),40);
+    },detectStop(){clearInterval(this.timer);}});
+    const Reverb=p5.Reverb,Envelope=p5.Envelope;
+    p5.Reverb=class extends Reverb{
+      constructor(...args){super(...args);effects.push({effect:this,maximumPeak:0});}
+    };
+    p5.Envelope=class extends Envelope{
+      constructor(...args){super(...args);this.kind=args[2]>0?'Pad':'Bell';envelopes.push(this);}
+      triggerAttack(){attacks[this.kind]++;if(this.kind==='Bell')bellEvents.push({at:performance.now(),mode});return super.triggerAttack();}
+    };
+    setInterval(()=>{
+      for(const item of effects){
+        if(!item.analyser){item.analyser=item.effect.ctx.createAnalyser();item.analyser.fftSize=2048;item.effect.output.connect(item.analyser);}
+        const samples=new Float32Array(item.analyser.fftSize);item.analyser.getFloatTimeDomainData(samples);
+        item.currentPeak=samples.reduce((p,v)=>Math.max(p,Math.abs(v)),0);
+        item.maximumPeak=Math.max(item.maximumPeak,item.currentPeak);
+      }
+      document.getElementById('module-check').textContent=JSON.stringify({mode,captureCalls,detectionLoops,
+        canvases:document.querySelectorAll('canvas').length,
+        readouts:Array.from(document.querySelectorAll('.readout')).map(e=>({text:e.textContent,absent:e.classList.contains('absent')})),
+        bellTiming:window.quietReply?{generator:quietReply.generator,deadline:quietReply.generative.bell.nextOpportunityAt,baseGap:quietReply.generative.bell.baseWaitMs,start:quietReply.generative.bell.waitStartedAt,phrase:!!quietReply.generative.bell.phrase}:null,bellEvents,audioButton:document.querySelector('.icon-toggle')?.getAttribute('aria-label'),logicalSize:[window.width,window.height],viewport:[window.innerWidth,window.innerHeight],resizeHook:typeof window.resizeCanvas,attacks,
+        audio:effects.map(e=>({reverbSeconds:e.effect.decayTime,maximumPeak:e.maximumPeak,currentPeak:e.currentPeak})),
+        envelopes:envelopes.map(e=>({kind:e.kind,value:e.node.value})),
+        fonts:Array.from(document.fonts).map(f=>({family:f.family,status:f.status}))});
+    },100);
+  </script>
+  <script type="module" src="/src/sketch.js"></script>
+</body>
+</html>

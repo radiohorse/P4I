@@ -1,0 +1,130 @@
+@font-face {
+  font-family: "Helvetica";
+  src: url("../assets/fonts/Helvetica.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Helvetica Light";
+  /* v2 removes legacy small-size hinting; refresh the cached webfont. */
+  src: url("../assets/fonts/Helvetica-Light.woff?v=2") format("woff");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
+:root {
+  /* Change the properties below to customize your page */
+  --background-color: #a6a6a6;
+  --shadow-color: rgba(0, 0, 0, 0.15);
+  --text-size: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: "Helvetica Light";
+  font-size: var(--text-size);
+  font-weight: 400;
+  font-synthesis: none;
+}
+
+html {
+  width: 100vw;
+  height: 100vh;
+
+  display: grid;
+  align-items: center;
+  justify-items: center;
+
+  background: var(--background-color);
+}
+
+canvas {
+  display: block;
+  /* Comment the line below to remove the shadow */
+  box-shadow: 0px 10px 30px 0px var(--shadow-color);
+}
+
+.cursor-hidden {
+  cursor: none;
+}
+
+.controls {
+  position: fixed;
+  top: 20px;
+  left: 24px;
+  right: 24px;
+  z-index: 2;
+  /* No box, no border: the text sits directly on the camera image. */
+  color: #3a4d43;
+  font-size: inherit;
+  line-height: 1.5;
+  pointer-events: none; /* Clicks pass through, except on the icon (see below). */
+}
+
+.scale-label {
+  margin: 0 0 10px;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* The icon is the button: every default button style is removed. */
+.icon-toggle {
+  all: unset;
+  display: inline-flex;
+  color: #3a4d43;
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+.icon-toggle:hover {
+  opacity: 1;
+}
+
+/* Keyboard users still see where focus is. */
+.icon-toggle:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 4px;
+}
+
+/* The percentages: the color tells you which instrument (same colors as the hand rings). */
+.readout {
+  min-width: 3ch;
+  font-variant-numeric: tabular-nums; /* Digits stay the same width, so the text doesn't jitter. */
+  transition: opacity 0.4s;
+}
+
+.readout.pad {
+  color: rgb(86, 120, 108);
+}
+
+.readout.bell {
+  color: rgb(167, 132, 65);
+}
+
+/* Dimmed while that hand is not in view. */
+.readout.absent {
+  opacity: 0.35;
+}
+
+.status-label {
+  margin-top: 12px;
+  font-size: inherit;
+}
+
+.status-label:empty {
+  display: none;
+}

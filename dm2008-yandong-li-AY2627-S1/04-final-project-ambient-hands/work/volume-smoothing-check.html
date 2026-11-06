@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Volume smoothing checks</title></head>
+<body>
+  <h1>Native audio volume smoothing checks</h1>
+  <p>Offline rendering only. No camera permission or audible playback.</p>
+  <pre id="volume-smoothing-result">Running…</pre>
+  <script type="module">
+    import { createAudioEngine } from '../src/audioEngine.js';
+
+    const output = document.getElementById('volume-smoothing-result');
+    const sampleRate = 48000;
+    const assert = (condition, message) => { if (!condition) throw new Error(message); };
+    const close = (actual, expected, message) => assert(Math.abs(actual - expected) < .0002,
+      `${message}: ${actual} != ${expected}`);
+
+    async function render(updates, duration) {
+      const context = new OfflineAudioContext(2, Math.ceil(duration * sampleRate), sampleRate);
+      const merger = context.createChannelMerger(2);
+      merger.connect(context.destination);
+      const source = context.createConstantSource();
+      source.offset.value = 1;
+      let channel = 0;
+      class SilentNode {
+        disconnect() {} connect() {} amp() {} freq() {} start() {}
+        triggerAttack() {} triggerRelease() {} releaseTime() {}
+      }
+      class Reverb extends SilentNode {
+        constructor() {
+          super();
+          this.output = context.createGain();
+          this.output.connect(merger, 0, channel++);
+          source.connect(this.output);
+        }
+        wet() {}
+      }
+      const clock = { currentTime: 0, resume: async () => {} };
+      const audio = createAudioEngine({ getAudioContext: () => clock, userStartAudio() {}, random: () => .9 },
+        { Reverb, SinOsc: SilentNode, TriOsc: SilentNode, Envelope: SilentNode, LowPass: SilentNode });
+      await audio.start();
+      for (const [time, level, visible = true, instrument = 'pad'] of updates) {
+        clock.currentTime = time;
+        audio.setHandVolume(instrument, level, visible);
+      }
+      source.start(0);
+      const rendered = await context.startRendering();
+      return [rendered.getChannelData(0), rendered.getChannelData(1)];
+    }
+    const at = (data, seconds) => data[Math.round(seconds * sampleRate)];
+    function largestStep(data) {
+      let maximum = 0;
+      for (let i = 1; i < data.length; i++) maximum = Math.max(maximum, Math.abs(data[i] - data[i - 1]));
+      return maximum;
+    }
+    function stepDetails(data) {
+      let index = 1;
+      for (let i = 2; i < data.length; i++) {
+        if (Math.abs(data[i] - data[i - 1]) > Math.abs(data[index] - data[index - 1])) index = i;
+      }
+      return { time: index / sampleRate, before: data[index - 1], after: data[index], step: largestStep(data) };
+    }
+
+    try {
+      const updates = Array.from({ length: 40 }, (_, i) => [i * .04, i % 2]);
+      const [rapid, unaffected] = await render(updates, 2);
+      const rapidStep = largestStep(rapid);
+      assert(rapidStep < .00013, `rapid changes produced a discontinuity: ${rapidStep}`);
+      const middle = rapid.subarray(sampleRate / 2, Math.round(1.56 * sampleRate));
+      let minimum = 1, maximum = 0;
+      for (const value of middle) { minimum = Math.min(minimum, value); maximum = Math.max(maximum, value); }
+      assert(minimum > .35 && maximum < .65, 'fast reversals must be damped, not swing between mute and full');
+      assert(unaffected.every(value => value === 1), 'left-hand changes must leave the right channel untouched');
+
+      const [lost] = await render([[.5, 1, false]], 10);
+      close(at(lost, .56), Math.exp(-.06 / .75), 'leaving must not mute in 60 ms');
+      close(at(lost, 1.25), Math.exp(-1), 'continuous exponential loss fade');
+      close(at(lost, 2.75), Math.exp(-3), '95% fade takes about 2.25 seconds');
+      assert(at(lost, 9.6) === 0, 'a stable missing hand eventually reaches exact silence');
+      // Chromium settles exponential targets near -87 dB; allow that inaudible
+      // residual while still rejecting the much steeper former 60 ms fade.
+      assert(largestStep(lost) < .00006, `loss fade has no abrupt sample jump: ${JSON.stringify(stepDetails(lost))}`);
+
+      const [fist] = await render([[.5, 0]], 3);
+      close(at(fist, .68), Math.exp(-1), 'visible fist uses ordinary smoothing');
+      assert(at(lost, .68) > at(fist, .68), 'loss fade is slower than an intentional fist');
+      assert(at(fist, 2.8) === 0, 'a held fist eventually reaches exact silence');
+
+      const [returned] = await render([[.5, 1, false], [.9, 1, true]], 10);
+      close(at(returned, .9), Math.exp(-.4 / .75), 'reappearance starts from the in-flight fade');
+      assert(largestStep(returned) < .00013, 'reappearance cannot jump back to full gain');
+      assert(at(returned, 9.6) === 1, 'the old loss deadline cannot mute a returned hand');
+
+      // Repeated render frames must not keep moving a missing hand's fade deadline.
+      const repeated = [[.5, 1, false], ...Array.from({ length: 180 }, (_, i) => [.51 + i / 60, .5, false])];
+      const [lossFrames] = await render(repeated, 10);
+      assert(lossFrames.every((value, index) => value === lost[index]), 'repeated loss updates must not restart the fade');
+
+      output.textContent = JSON.stringify({ result: 'PASS', sampleRate,
+        checks: ['40 rapid reversals', 'no sample discontinuities', 'independent hands',
+          'slow tracking-loss fade', 'intentional fist smoothing', 'return without stale mute',
+          'exact endpoint settling', 'loss fade never restarts'],
+        rapid: { largestSampleStep: rapidStep, minimum, maximum },
+        lost: { gainAfter60ms: at(lost, .56), gainAfter2250ms: at(lost, 2.75), largestSampleStep: largestStep(lost) },
+        returned: { gainAtReturn: at(returned, .9), gainAfterOldDeadline: at(returned, 9.6) },
+      }, null, 2);
+      document.title = 'PASS — Volume smoothing checks';
+    } catch (error) {
+      output.textContent = JSON.stringify({ result: 'FAIL', message: error.message, stack: error.stack }, null, 2);
+      document.title = 'FAIL — Volume smoothing checks';
+    }
+  </script>
+</body>
+</html>

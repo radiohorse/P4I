@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Instrument audio check</title><link rel="stylesheet" href="/css/normalize.css"><link rel="stylesheet" href="/css/style.css"><script src="/js/helper.js"></script><script src="/js/p5.min.js"></script><script src="/js/p5.sound.min.js"></script></head><body><script src="/sketch.js"></script><output hidden id="audio-check"></output><script>
+instrument = new URLSearchParams(location.search).get('instrument') || 'Pad';
+const recorded=[];
+const realPad=playPad,realBell=playBell;
+playPad=function(midi){const before=activePadVoice;const result=realPad(midi);if(result)recorded.push({instrument:'Pad',midi,time:getAudioContext().currentTime,newAttack:before!==activePadVoice});return result;};
+playBell=function(midi){const result=realBell(midi);if(result)recorded.push({instrument:'Bell',midi,time:getAudioContext().currentTime});return result;};
+let analyser,maximumPeak=0;
+setInterval(()=>{
+ const effect=instrument==='Pad'?padReverb:bellReverb;
+ if(!effect)return;
+ const context=getAudioContext();
+ if(!analyser){analyser=context.createAnalyser();analyser.fftSize=2048;effect.output.connect(analyser);}
+ const data=new Float32Array(analyser.fftSize);analyser.getFloatTimeDomainData(data);
+ const currentPeak=data.reduce((p,v)=>Math.max(p,Math.abs(v)),0);maximumPeak=Math.max(maximumPeak,currentPeak);
+ document.getElementById('audio-check').textContent=JSON.stringify({instrument,context:context.state,running:audioRunning,intensity:Number(intensitySlider.value()),hovered:getHoveredZone(),currentPeak,maximumPeak,activePadMidi:activePadVoice?activePadVoice.midi:null,padEnvelopes:padVoices.map(v=>v.envelope.node.value),nextDecisionInMs:nextOpportunityAt-millis(),events:recorded});
+},100);
+</script></body></html>
