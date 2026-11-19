@@ -12,10 +12,10 @@ This is my work for DM2008 during my exchange at NTU. I explored drawing, motion
 
 | Folder | What's inside |
 | --- | --- |
-| [01 - Activities](01-activities/) | Weekly p5.js exercises and Arduino experiments. |
-| [02 - Mini Project](02-mini-project/) | Pong with music-reactive visuals and my own soundtrack. |
-| [03 - Sensor Jam](03-sensor-jam/) | An ultrasonic sensor connected to p5.js through Web Serial. |
-| [04 - Final Project](04-final-project-ambient-hands/) | Ambient Hands, a gesture-controlled ambient instrument. |
+| [01 - Activities](dm2008-yandong-li-AY2627-S1/01-activities/) | Weekly p5.js exercises and Arduino experiments. |
+| [02 - Mini Project](dm2008-yandong-li-AY2627-S1/02-mini-project/) | Pong with music-reactive visuals and my own soundtrack. |
+| [03 - Sensor Jam](dm2008-yandong-li-AY2627-S1/03-sensor-jam/) | An ultrasonic sensor connected to p5.js through Web Serial. |
+| [04 - Final Project](dm2008-yandong-li-AY2627-S1/04-final-project-ambient-hands/) | Ambient Hands, a gesture-controlled ambient instrument. |
 
 ## Project Highlights
 
@@ -23,37 +23,37 @@ This is my work for DM2008 during my exchange at NTU. I explored drawing, motion
 
 I used hand tracking to play ambient music. The left hand controls a Pad and the right hand controls a Bell. Position changes the notes, openness controls volume, and distance changes reverb.
 
-![Ambient Hands interface with a 24-zone pitch grid and two hand markers](04-final-project-ambient-hands/work/single-file-preview.png)
+![Ambient Hands interface with a 24-zone pitch grid and two hand markers](dm2008-yandong-li-AY2627-S1/04-final-project-ambient-hands/work/single-file-preview.png)
 
-[Project notes](04-final-project-ambient-hands/README.md) / [Sketch](04-final-project-ambient-hands/index.html)
+[Project notes](dm2008-yandong-li-AY2627-S1/04-final-project-ambient-hands/README.md) / [Sketch](dm2008-yandong-li-AY2627-S1/04-final-project-ambient-hands/index.html)
 
 ### Pong by Dong
 
 I made a Pong variation with soft trails and a light blue palette. FFT analysis changes the ball's size and colour to my own track, *Luminous Dance*. I also added a start menu and a game over screen.
 
-![Pong gameplay with a blue ball and fading trails](<02-mini-project/documentation/Pong by Dong.gif>)
+![Pong gameplay with a blue ball and fading trails](dm2008-yandong-li-AY2627-S1/02-mini-project/documentation/Pong%20by%20Dong.gif)
 
-[Source](<02-mini-project/Yandong Li DM2008 Mini Project (Pong) copy_2026_09_25_06_24_11/>) / [Video demo](https://www.youtube.com/watch?v=Mx5z4Iru7pg)
+[Source](dm2008-yandong-li-AY2627-S1/02-mini-project/Yandong%20Li%20DM2008%20Mini%20Project%20%28Pong%29%20copy_2026_09_25_06_24_11/) / [Video demo](https://www.youtube.com/watch?v=Mx5z4Iru7pg)
 
 ### Sensor Jam
 
 I mapped ultrasonic distance readings to the size and colour of a circle and rectangles. Smoothing makes the visual changes less abrupt.
 
-![A green circle and purple rectangles responding to distance readings](01-activities/week-09/documentation/02.png)
+![A green circle and purple rectangles responding to distance readings](dm2008-yandong-li-AY2627-S1/01-activities/week-09/documentation/02.png)
 
-[Sketch](03-sensor-jam/index.html) / [Arduino code](01-activities/week-09/Activity_9a/9a.ino)
+[Sketch](dm2008-yandong-li-AY2627-S1/03-sensor-jam/index.html) / [Arduino code](dm2008-yandong-li-AY2627-S1/01-activities/week-09/Activity_9a/9a.ino)
 
 ## Weekly Activities
 
 | Week | Focus |
 | --- | --- |
-| [01](01-activities/week-01/README.md) | Drawing with code; simple creatures, lines and circles. |
-| [02](01-activities/week-02/README.md) | Conditions, loops and repeating patterns. |
-| [03](01-activities/week-03/README.md) | Arrays, functions and overlapping shapes. |
-| [04](01-activities/week-04/README.md) | Classes, objects and moving agents. |
-| [05](01-activities/week-05/README.md) | Vectors and collision responses. |
-| [08](01-activities/week-08/README.md) | LEDs, light, pressure and distance sensors. |
-| [09](01-activities/week-09/README.md) | Sensor mapping, smoothing and Web Serial. |
+| [01](dm2008-yandong-li-AY2627-S1/01-activities/week-01/README.md) | Drawing with code; simple creatures, lines and circles. |
+| [02](dm2008-yandong-li-AY2627-S1/01-activities/week-02/README.md) | Conditions, loops and repeating patterns. |
+| [03](dm2008-yandong-li-AY2627-S1/01-activities/week-03/README.md) | Arrays, functions and overlapping shapes. |
+| [04](dm2008-yandong-li-AY2627-S1/01-activities/week-04/README.md) | Classes, objects and moving agents. |
+| [05](dm2008-yandong-li-AY2627-S1/01-activities/week-05/README.md) | Vectors and collision responses. |
+| [08](dm2008-yandong-li-AY2627-S1/01-activities/week-08/README.md) | LEDs, light, pressure and distance sensors. |
+| [09](dm2008-yandong-li-AY2627-S1/01-activities/week-09/README.md) | Sensor mapping, smoothing and Web Serial. |
 
 ## Running the Sketches
 
